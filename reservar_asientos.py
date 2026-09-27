@@ -3,28 +3,36 @@ import random
 from time import time
 from time import sleep
 
+#Función para que un hilo intente reservar un asiento
 def intentarReservar(index_asiento, index_hilo, tries):
+
+    #Si es su tercer intento reservando, se rinde
     if(tries == 3):
         print(f"Persona No. {index_hilo+1} no pudo encontrar asientos. Compra cancelada\n")
         return 0
-    
+
+    #Si el asiento ya está ocupado, vuelve a intentar con otro asiento aleatorio
     if(asientos[index_asiento].acquire(blocking=False) == False):
         tries += 1
         intentarReservar(random.randint(0, CANTIDAD_ASIENTOS-1),index_hilo, tries)
     else:
 
+        #Si no está ocupado, lo bloquea y duerme entre 0 y 4 segundos
         time1 = time()
         sleep(random.randint(0, 4))
         time2 = time()
 
         sleeping_time = time2 - time1
 
-        if(sleeping_time >= 2.5):
+        #Si 2 o más segundos, la transacción se cancela. Se libera el asiento e intenta reservar otro asiento aleatorio
+        if(sleeping_time >= 2):
             print(f"Persona No. {index_hilo+1} no pudo completar la transacción, sigue buscando asientos.\n")
             tries += 1
-            intentarReservar(random.randint(0, CANTIDAD_ASIENTOS-1),index_hilo, tries)
             asientos[index_asiento].release()
+            intentarReservar(random.randint(0, CANTIDAD_ASIENTOS-1),index_hilo, tries)
+            
         else:
+            #La transacción se completó
             print(f"Compra confirmada para persona {index_hilo+1}, No. Asiento: {index_asiento+1}\n")
 
         return 0
