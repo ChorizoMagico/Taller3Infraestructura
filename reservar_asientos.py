@@ -6,11 +6,20 @@ from time import sleep
 #Función para que un hilo intente reservar un asiento
 def intentarReservar(index_asiento, index_hilo, tries):
 
+    sinProbar = [] #Lista de asientos que no ha intentado reservar la persona
+
+    #Llena la lista de asientos que no se han intentado reservar
+    for i in range(CANTIDAD_ASIENTOS): 
+        if i != index_asiento:
+            sinProbar.append(i)
+    random.shuffle(sinProbar) #Mezcla al azar la lista de asientos que no ha intentado reservar la persona
+
     while tries < 3:
-        #Si el asiento ya está ocupado, vuelve a intentar con otro asiento aleatorio
+        #Si el asiento ya está ocupado, vuelve a intentar con otro asiento aleatorio,
+        # y saca de la lista de asientos no intentados un asiento nuevo
         if(asientos[index_asiento].acquire(blocking=False) == False):
             tries += 1
-            index_asiento = random.randint(0, CANTIDAD_ASIENTOS-1)
+            index_asiento = sinProbar.pop()
         else:
 
             #Si no está ocupado, lo bloquea y duerme entre 0 y 4 segundos
@@ -25,7 +34,7 @@ def intentarReservar(index_asiento, index_hilo, tries):
                 print(f"Persona No. {index_hilo+1} no pudo completar la transacción, sigue buscando asientos.\n")
                 tries += 1
                 asientos[index_asiento].release()
-                index_asiento = random.randint(0, CANTIDAD_ASIENTOS-1)
+                index_asiento = sinProbar.pop()
                 
             else:
                 #La transacción se completó
@@ -41,7 +50,7 @@ def intentarReservar(index_asiento, index_hilo, tries):
 if __name__ == "__main__":
 
     CANTIDAD_HILOS = 20
-    CANTIDAD_ASIENTOS = 5
+    CANTIDAD_ASIENTOS = 8
     
     hilos = [None] * CANTIDAD_HILOS
 
