@@ -19,21 +19,25 @@ def intentarReservar(index_asiento, index_hilo, tries):
         # y saca de la lista de asientos no intentados un asiento nuevo
         if(asientos[index_asiento].acquire(blocking=False) == False):
             tries += 1
+            if not sinProbar:
+                break #Si no hay más asientos, se sale del ciclo while
             index_asiento = sinProbar.pop()
         else:
 
             #Si no está ocupado, lo bloquea y duerme entre 0 y 4 segundos
             time1 = time()
-            sleep(random.randint(0, 4))
+            sleep(random.randint(1, 4))
             time2 = time()
 
             sleeping_time = time2 - time1
 
-            #Si 2 o más segundos, la transacción se cancela. Se libera el asiento e intenta reservar otro asiento aleatorio
-            if(sleeping_time >= 2):
+            #Si 3 o más segundos, la transacción se cancela. Se libera el asiento e intenta reservar otro asiento aleatorio
+            if(sleeping_time >= 3):
                 print(f"Persona No. {index_hilo+1} no pudo completar la transacción, sigue buscando asientos.\n")
                 tries += 1
                 asientos[index_asiento].release()
+                if not sinProbar:
+                    break #Si no hay más asientos, se sale del ciclo while
                 index_asiento = sinProbar.pop()
                 
             else:
